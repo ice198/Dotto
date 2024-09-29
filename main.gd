@@ -11,8 +11,8 @@ extends Control
 @onready var cache_canvas = $CacheCanvas
 
 # キャンバスの横幅と縦幅(後で開始時に設定できるようにする)
-var canvas_width = 400
-var canvas_height = 400
+var canvas_width = 40
+var canvas_height = 40
 
 # キャンバスをズームした縦幅と横幅
 var dot_size = 1  # 1ドットのサイズ（ピクセル単位）
@@ -105,6 +105,8 @@ var layer_top_space = 60
 func _ready() -> void:
 	# プレビューゾーンを初期化
 	#preview_zone.size = Vector2(canvas_width + preview_frame_width * 2, canvas_height + preview_frame_width * 2)
+	
+	window_title("新しいタイトル")
 	
 	# グリッドの初期化
 	for layer in range(layers_num):
