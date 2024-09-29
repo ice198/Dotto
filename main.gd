@@ -1,5 +1,5 @@
 extends Control
-
+# コミットテスト
 @onready var inspector_rect = $InspectorRect
 @onready var color_picker = $InspectorRect/ColorPicker
 @onready var export_dialog = $ExportDialog
