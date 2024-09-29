@@ -1,0 +1,15 @@
+ea4bc82a6ad023ab7ee23ee620429895
+::res://::1727575487
+export_presets.cfg::TextFile::-1::1727574248::0::1::::<><>::
+icon.svg::CompressedTexture2D::2335001591404326798::1726908645::1726908657::1::::<><>::
+main.gd::GDScript::-1::1727575313::0::1::::<>Control<>::
+main.tscn::PackedScene::6966536384637014752::1727575321::0::1::::<><>::res://main.gd<>uid://doe8c2pigmbrj::::res://icon/download.svg<>uid://6qph5b1je0rb::::res://icon/pencil2.svg<>uid://cq0lfsd2r0wqm::::res://icon/grid.png<>uid://bvrsdlgs6rnn::::res://icon/checkerboard-pattern.png
+::res://font/::1726910974
+NotoSansJP-Regular.ttf::FontFile::4902276026522969545::1723051634::1726910974::1::::<><>::
+::res://icon/::1727014977
+checkerboard-pattern.png::CompressedTexture2D::114605284501409827::1727014683::1727014977::1::::<><>::
+download.svg::CompressedTexture2D::8152172047051593679::1726984417::1726984708::1::::<><>::
+drag.png::CompressedTexture2D::369714728000777305::1726995681::1726995688::1::::<><>::
+grid.png::CompressedTexture2D::5948150076641368828::1727003082::1727003223::1::::<><>::
+pencil2.svg::CompressedTexture2D::2209809030731635031::1726990495::1726990538::1::::<><>::
+pencil.svg::CompressedTexture2D::1735991350908066577::1726990189::1726990195::1::::<><>::

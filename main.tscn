@@ -1,0 +1,125 @@
+[gd_scene load_steps=6 format=3 uid="uid://c6iv3o6dhkeou"]
+
+[ext_resource type="Script" path="res://main.gd" id="1_dq2d7"]
+[ext_resource type="Texture2D" uid="uid://doe8c2pigmbrj" path="res://icon/download.svg" id="2_m27m7"]
+[ext_resource type="Texture2D" uid="uid://6qph5b1je0rb" path="res://icon/pencil2.svg" id="3_ongpc"]
+[ext_resource type="Texture2D" uid="uid://cq0lfsd2r0wqm" path="res://icon/grid.png" id="4_4a3wp"]
+[ext_resource type="Texture2D" uid="uid://bvrsdlgs6rnn" path="res://icon/checkerboard-pattern.png" id="5_fdmtw"]
+
+[node name="Main" type="Control"]
+texture_filter = 1
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_dq2d7")
+
+[node name="BackGround" type="Sprite2D" parent="."]
+texture_filter = 1
+position = Vector2(-27, -23)
+scale = Vector2(1.33687, 1.3425)
+texture = ExtResource("5_fdmtw")
+centered = false
+
+[node name="CanvasSprite" type="Sprite2D" parent="."]
+texture_filter = 1
+
+[node name="LayerZone" type="ColorRect" parent="."]
+layout_mode = 0
+offset_right = 229.0
+offset_bottom = 4603.0
+color = Color(0.1, 0.1, 0.1, 1)
+
+[node name="LayerLabel" type="Label" parent="LayerZone"]
+layout_mode = 0
+offset_left = -10.0
+offset_right = 220.0
+offset_bottom = 49.0
+text = "レイヤー"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PreviewSprite" type="Sprite2D" parent="."]
+texture_filter = 1
+
+[node name="PreviewFrame" type="Line2D" parent="."]
+
+[node name="GuideLine" type="Line2D" parent="."]
+
+[node name="InspectorRect" type="ColorRect" parent="."]
+layout_mode = 0
+offset_left = 1243.0
+offset_top = 1.0
+offset_right = 1657.0
+offset_bottom = 4594.0
+color = Color(0.1, 0.1, 0.1, 1)
+
+[node name="ColorPicker" type="ColorPicker" parent="InspectorRect"]
+layout_mode = 0
+offset_left = 27.0
+offset_top = 28.0
+offset_right = 325.0
+offset_bottom = 576.0
+color = Color(0, 0, 0, 1)
+picker_shape = 1
+
+[node name="ColorRect2" type="ColorRect" parent="InspectorRect"]
+layout_mode = 0
+offset_left = -90.0
+offset_top = 13.0
+offset_right = -22.0
+offset_bottom = 393.0
+
+[node name="ExportButton" type="Button" parent="InspectorRect/ColorRect2"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 127.0
+offset_right = 59.0
+offset_bottom = 178.0
+icon = ExtResource("2_m27m7")
+flat = true
+icon_alignment = 1
+expand_icon = true
+
+[node name="PencilButton" type="Button" parent="InspectorRect/ColorRect2"]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 17.0
+offset_right = 53.0
+offset_bottom = 63.0
+icon = ExtResource("3_ongpc")
+flat = true
+expand_icon = true
+
+[node name="GridButton" type="Button" parent="InspectorRect/ColorRect2"]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 73.0
+offset_right = 58.0
+offset_bottom = 123.0
+icon = ExtResource("4_4a3wp")
+flat = true
+expand_icon = true
+
+[node name="ExportDialog" type="FileDialog" parent="."]
+position = Vector2i(0, 36)
+size = Vector2i(839, 185)
+access = 2
+use_native_dialog = true
+
+[node name="CacheCanvas" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.235
+anchor_bottom = 0.207
+offset_left = 435.0
+offset_top = 203.0
+offset_right = 629.0
+offset_bottom = 478.35
+
+[connection signal="color_changed" from="InspectorRect/ColorPicker" to="." method="_on_color_picker_color_changed"]
+[connection signal="pressed" from="InspectorRect/ColorRect2/ExportButton" to="." method="_on_export_button_pressed"]
+[connection signal="pressed" from="InspectorRect/ColorRect2/GridButton" to="." method="_on_grid_button_pressed"]
+[connection signal="file_selected" from="ExportDialog" to="." method="_on_file_dialog_file_selected"]
