@@ -11,8 +11,8 @@ extends Control
 @onready var cache_canvas = $CacheCanvas
 
 # キャンバスの横幅と縦幅(後で開始時に設定できるようにする)
-var canvas_width = 40
-var canvas_height = 40
+var canvas_width = 1000
+var canvas_height = 1000
 
 # キャンバスをズームした縦幅と横幅
 var dot_size = 1  # 1ドットのサイズ（ピクセル単位）
@@ -101,13 +101,11 @@ var zoom_correction = 1
 # レイヤー関連
 var layer_top_space = 60
 
+# 色設定
+var accent_color = Color.LIGHT_SKY_BLUE
+
 ### 開始時に実行 ###
 func _ready() -> void:
-	# プレビューゾーンを初期化
-	#preview_zone.size = Vector2(canvas_width + preview_frame_width * 2, canvas_height + preview_frame_width * 2)
-	
-	window_title("新しいタイトル")
-	
 	# グリッドの初期化
 	for layer in range(layers_num):
 		var layer_grid = []  # 新しいレイヤーを初期化
@@ -147,44 +145,17 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	# DEBUG--------------
 	var fps = str(Engine.get_frames_per_second())
-	#print("", fps)
+	print("", fps)
 	#print("",is_mouse_wheel_move)
 
 	_draw_preview_frame()
-	_draw_guide_line()
-	
-	""" 
-	var preview = Sprite2D.new()
-	var preview_img = Image.new()
-	preview_img = preview_img.create(canvas_width, canvas_height, false, Image.FORMAT_RGBA8)
-	
-	for x in range(canvas_width):
-		for y in range(canvas_height):
-			preview_img.set_pixel(x, y, grid[0][x][y])
-	
-	var preview_image_texture = ImageTexture.create_from_image(preview_img)
-	preview.texture = preview_image_texture
-	preview.position.x = 0
-	preview.position.y = 20
-	
-	layer_zone.add_child(preview)
-	preview.show()
-	""" 
 	#--------------------
 	
-	# カラーピッカーの位置を更新
 	_update_color_picker_position()
-	
-	# レイヤーゾーンの位置を更新
 	_update_layer_position()
+	_draw_guide_line()
 	
-	# ウィンドウサイズを取得
 	window_size = get_viewport().size
-	
-	# ガイド線を更新
-	#_draw_guide_line()
-	
-	# GUI上でのマウスカーソルの座標を取得
 	global_mouse_x_point = get_global_mouse_position().x
 	global_mouse_y_point = get_global_mouse_position().y
 
@@ -195,9 +166,8 @@ func _process(delta: float) -> void:
 	# マウスが左クリックされたらドットを描画
 	if is_mouse_left_held:
 		if not is_mouse_right_held: # ドラッグ中は無効
-			#if not is_mouse_wheel_move: # 拡大縮小しているときは無効
 			if mouse_x_point >= 0 and mouse_x_point < zoom_width and mouse_y_point >= 0 and mouse_y_point < zoom_height:
-				# 初めて筆をおろしたとき
+				# 書き始めた場合
 				if one_before_pixel_x < 0:
 					var grid_x = int(mouse_x_point / dot_size)
 					var grid_y = int(mouse_y_point / dot_size)
@@ -205,7 +175,6 @@ func _process(delta: float) -> void:
 					# グリッドに色を設定
 					grid[current_layer_index][grid_x][grid_y] = color_on
 						
-					# 筆を一度おろしたと記録
 					one_before_pixel_x = grid_x
 					one_before_pixel_y = grid_y
 				else:
@@ -226,9 +195,6 @@ func _process(delta: float) -> void:
 						
 					one_before_pixel_x = grid_x
 					one_before_pixel_y = grid_y
-					
-				_draw_canvas_sprite(current_layer_index)
-				_draw_preview_sprite()
 	
 	# マウスの右クリックでドラッグ
 	if is_mouse_right_held:
@@ -324,6 +290,13 @@ func _input(event):
 		elif event.is_action_released("MOUSE_R"):
 			is_mouse_right_held = false
 			
+		# 左クリックが離された瞬間に描画を更新
+		const BUTTON_RIGHT = 1
+		if event is InputEventMouseButton:
+			if event.button_index == BUTTON_RIGHT and not event.pressed:
+				_draw_canvas_sprite(current_layer_index)
+				_draw_preview_sprite()
+			
 	# キーボードからの入力
 	if event is InputEventKey:
 		# オフセットを変更してキャンバスを移動
@@ -354,14 +327,8 @@ func _save_as_png(path: String):
 	for x in range(canvas_width):
 		for y in range(canvas_height):
 			img.set_pixel(x, y, grid[1][x][y])
-
-	# グリッドの内容を画像にコピー
-	#for x in range(canvas_width):
-		#for y in range(canvas_height):
-			#img.set_pixel(x, y, grid[x][y]) 
 			
 	img.save_png(path)
-	
 
 # ウィンドウのサイズに合わせてカラーピッカーの位置を変更
 func _update_color_picker_position():
@@ -459,7 +426,7 @@ func _draw_preview_frame():
 	var preview_frame_color = Color(0.3, 0.3, 0.3)
 	
 	if is_mouse_on_preview:
-		preview_frame_color = Color(1, 0.5, 0.5)
+		preview_frame_color = accent_color
 		
 	preview_frame.default_color = preview_frame_color
 
@@ -681,4 +648,4 @@ func remove_layer():
 # プレビューをマウスクリックで素早く切り替えられるようにする
 # レイヤー表示部分を作る
 # 線を引くときはドットのみをdrawで描画してからマウスが離れた時点で計算してテクスチャを読み込み
-# レイヤーをフレームとして扱い、rustを用いてGIFとして出力
+# カラーピッカーを操作しているときに裏で描画されている不具合
