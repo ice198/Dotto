@@ -1,10 +1,17 @@
-[gd_scene load_steps=6 format=3 uid="uid://c6iv3o6dhkeou"]
+[gd_scene load_steps=9 format=3 uid="uid://c6iv3o6dhkeou"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_dq2d7"]
 [ext_resource type="Texture2D" uid="uid://doe8c2pigmbrj" path="res://icon/download.svg" id="2_m27m7"]
+[ext_resource type="FontFile" uid="uid://cb3x1gbe7mu0h" path="res://font/NotoSansJP-Regular.ttf" id="3_afd0j"]
 [ext_resource type="Texture2D" uid="uid://6qph5b1je0rb" path="res://icon/pencil2.svg" id="3_ongpc"]
 [ext_resource type="Texture2D" uid="uid://cq0lfsd2r0wqm" path="res://icon/grid.png" id="4_4a3wp"]
 [ext_resource type="Texture2D" uid="uid://bvrsdlgs6rnn" path="res://icon/checkerboard-pattern.png" id="5_fdmtw"]
+[ext_resource type="Script" path="res://cache_canvas.gd" id="6_dh2uk"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_kilfh"]
+font = ExtResource("3_afd0j")
+font_size = 20
+font_color = Color(0, 0, 0, 1)
 
 [node name="Main" type="Control"]
 texture_filter = 1
@@ -24,7 +31,26 @@ texture = ExtResource("5_fdmtw")
 centered = false
 
 [node name="CanvasSprite" type="Sprite2D" parent="."]
+visible = false
 texture_filter = 1
+
+[node name="Start" type="ColorRect" parent="."]
+layout_mode = 0
+offset_left = 314.0
+offset_top = 140.0
+offset_right = 1108.0
+offset_bottom = 696.0
+
+[node name="NewCanvas" type="Label" parent="Start"]
+layout_mode = 0
+offset_left = 174.0
+offset_top = 40.0
+offset_right = 514.0
+offset_bottom = 104.0
+text = "New Canvas"
+label_settings = SubResource("LabelSettings_kilfh")
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="LayerZone" type="ColorRect" parent="."]
 layout_mode = 0
@@ -118,6 +144,7 @@ offset_left = 435.0
 offset_top = 203.0
 offset_right = 629.0
 offset_bottom = 478.35
+script = ExtResource("6_dh2uk")
 
 [connection signal="color_changed" from="InspectorRect/ColorPicker" to="." method="_on_color_picker_color_changed"]
 [connection signal="pressed" from="InspectorRect/ColorRect2/ExportButton" to="." method="_on_export_button_pressed"]
