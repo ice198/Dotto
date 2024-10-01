@@ -146,7 +146,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	# DEBUG--------------
 	var fps = str(Engine.get_frames_per_second())
-	print("", fps)
+	#print("", fps)
 	#print("",is_mouse_wheel_move)
 
 	_draw_preview_frame()
@@ -528,43 +528,6 @@ func _switch_layer():
 func _update_layer_zone():
 	pass
 
-func _draw():
-	""" 
-	# キャンバスを描画
-	for x in range(canvas_width):
-		for y in range(canvas_height):
-			var rect = Rect2(offset_x + x * dot_size, offset_y + y * dot_size, dot_size, dot_size)
-			var color = grid[current_layer_index][x][y]  # 現在のレイヤーから色を取得
-			draw_rect(rect, color)  # セルを描画
-
-			# グリッドモードがonになっていた場合はグレーのグリッドを描画
-			if is_grid_on:
-				draw_rect(Rect2(rect.position, rect.size), Color(0.5, 0.5, 0.5), false)
-	
-	# キャンバスを描画
-	for x in range(canvas_width):
-		for y in range(canvas_height):
-			var rect = Rect2(offset_x + mouse_x_point * dot_size, offset_y + mouse_y_point * dot_size, dot_size, dot_size)
-			var color = grid[current_layer_index][x][y]  # 現在のレイヤーから色を取得
-			draw_rect(rect, color)  # セルを描画
-
-			# グリッドモードがonになっていた場合はグレーのグリッドを描画
-			#if is_grid_on:
-				#draw_rect(Rect2(rect.position, rect.size), Color(0.5, 0.5, 0.5), false)
-
-	# クリックされた位置にドットを描画
-	var dot_x = int((mouse_x_point - offset_x) / dot_size)
-	var dot_y = int((mouse_y_point - offset_y) / dot_size)
-	if dot_x >= 0 and dot_x < canvas_width and dot_y >= 0 and dot_y < canvas_height:
-		var dot_rect = Rect2(offset_x + dot_x * dot_size, offset_y + dot_y * dot_size, dot_size, dot_size)
-		draw_rect(dot_rect, Color(1, 0, 0))  # 例えば赤色のドットを描画
-		"""
-	#draw_rect(Rect2(500, 500, 100, 500), Color.BLUE, true)
-	#var outer_rect = Rect2(0, 0, canvas_width * preview_zoom_X + 5, canvas_height * preview_zoom_X + 5)
-	#draw_rect(outer_rect, Color(0, 0, 0))  # 内側の枠（黒）
-	
-	var outer_rect = Rect2(global_mouse_x_point, global_mouse_y_point, 10, 10) #(オフセットx,y,横,縦)
-	draw_rect(outer_rect, Color(0, 0, 1))
 # カラーピッカーから色を取得
 func _on_color_picker_color_changed(color: Color) -> void:
 	color_red = color.r
@@ -593,64 +556,8 @@ func _on_grid_button_pressed() -> void:
 func _on_create_button_pressed() -> void:
 	start_screen.hide()
 
-""" # マウスでクリックしたところにのみドットを描画する際に再利用
-func _draw():
-	# キャンバスを描画
-	for x in range(canvas_width):
-		for y in range(canvas_height):
-			var rect = Rect2(offset_x + x * dot_size, offset_y + y * dot_size, dot_size, dot_size)
-			var color = grid[current_layer_index][x][y]  # 現在のレイヤーから色を取得
-			draw_rect(rect, color)  # セルを描画
+func _on_width_box_value_changed(value: float) -> void:
+	canvas_width = value
 
-			# グリッドモードがonになっていた場合はグレーのグリッドを描画
-			if is_grid_on:
-				draw_rect(Rect2(rect.position, rect.size), Color(0.5, 0.5, 0.5), false)
-
-	# レイヤーを表示
-	if layers_num > 1:
-		for layer in range(layers_num):
-			for x in range(canvas_width):
-				for y in range(canvas_height):
-					var rect_layer = Rect2(x * preview_zoom_X,y * preview_zoom_X + current_layer_index * (canvas_height * preview_zoom_X) + 5,preview_zoom_X,preview_zoom_X)
-					var color = grid[current_layer_index][x][y]  # 現在のレイヤーから色を取得
-					draw_rect(rect_layer, color)  # セルを描画
-
-	#レイヤー
-	#for layer in range(layers_num):
-		#for x in range(canvas_width):
-			#for y in range(canvas_height):
-				#var color = grid[layer][x][y]
-				#var rect2 = Rect2(offset_x + x * dot_size, offset_y + y * dot_size, dot_size, dot_size)
-				#draw_rect(rect2, color)
-
-
-
-# レイヤーを削除する関数
-func remove_layer():
-	if layers.size() > 1:
-		layers.remove(current_layer_index)
-		current_layer_index = max(0, current_layer_index - 1)  # 最後のレイヤーが削除された場合
-"""
-
-### メモ
-# ウィンドウの横幅: 1600
-# ウィンドウの縦幅: 950
-# インスペクターの横幅: 350
-# レイヤーの横幅: 200
-
-### 実装予定
-# 描画中は移動禁止
-# レンダリング時にはグリッドが描画されないようにする
-# プレビュー画面の背景を白にする
-# pngに保存するときにすべてのレイヤーを重ねる
-# 線がカクカク
-# 線を描画する得に縁が描画できていない
-# ドットが書き換えられた部分のみをgrid[]に保存して描画
-# レイヤーを実装してキャンバスに描画
-# 拡大縮小がカクカク
-# プレビューのガイド線がずれている
-# キャンバスを中央に戻すボタンを実装
-# プレビューをマウスクリックで素早く切り替えられるようにする
-# レイヤー表示部分を作る
-# 線を引くときはドットのみをdrawで描画してからマウスが離れた時点で計算してテクスチャを読み込み
-# カラーピッカーを操作しているときに裏で描画されている不具合
+func _on_height_box_value_changed(value: float) -> void:
+	canvas_height = value

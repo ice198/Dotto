@@ -1,21 +1,21 @@
 [gd_scene load_steps=11 format=3 uid="uid://c6iv3o6dhkeou"]
 
-[ext_resource type="Script" path="res://main.gd" id="1_dq2d7"]
-[ext_resource type="Texture2D" uid="uid://doe8c2pigmbrj" path="res://icon/download.svg" id="2_m27m7"]
-[ext_resource type="FontFile" uid="uid://cb3x1gbe7mu0h" path="res://font/NotoSansJP-Regular.ttf" id="3_afd0j"]
-[ext_resource type="Texture2D" uid="uid://6qph5b1je0rb" path="res://icon/pencil2.svg" id="3_ongpc"]
-[ext_resource type="Texture2D" uid="uid://cq0lfsd2r0wqm" path="res://icon/grid.png" id="4_4a3wp"]
-[ext_resource type="Texture2D" uid="uid://bvrsdlgs6rnn" path="res://icon/checkerboard-pattern.png" id="5_fdmtw"]
-[ext_resource type="Script" path="res://cache_canvas.gd" id="6_dh2uk"]
-[ext_resource type="Script" path="res://start.gd" id="7_s7gqp"]
+[ext_resource type="Script" path="res://scripts/main.gd" id="1_co7tq"]
+[ext_resource type="Texture2D" uid="uid://bvrsdlgs6rnn" path="res://icon/checkerboard-pattern.png" id="2_0hgt6"]
+[ext_resource type="Texture2D" uid="uid://doe8c2pigmbrj" path="res://icon/download.svg" id="3_nkl5c"]
+[ext_resource type="Texture2D" uid="uid://6qph5b1je0rb" path="res://icon/pencil2.svg" id="4_a72mu"]
+[ext_resource type="Texture2D" uid="uid://cq0lfsd2r0wqm" path="res://icon/grid.png" id="5_xkn8y"]
+[ext_resource type="Script" path="res://scripts/cache_canvas.gd" id="6_iua2o"]
+[ext_resource type="Script" path="res://scripts/start.gd" id="7_k7poc"]
+[ext_resource type="FontFile" uid="uid://cb3x1gbe7mu0h" path="res://font/NotoSansJP-Regular.ttf" id="8_ymggg"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_kilfh"]
-font = ExtResource("3_afd0j")
+font = ExtResource("8_ymggg")
 font_size = 20
 font_color = Color(0, 0, 0, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_bemsk"]
-font = ExtResource("3_afd0j")
+font = ExtResource("8_ymggg")
 font_color = Color(0, 0, 0, 1)
 
 [node name="Main" type="Control"]
@@ -26,13 +26,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_dq2d7")
+script = ExtResource("1_co7tq")
 
 [node name="BackGround" type="Sprite2D" parent="."]
 texture_filter = 1
 position = Vector2(-27, -23)
 scale = Vector2(1.33687, 1.3425)
-texture = ExtResource("5_fdmtw")
+texture = ExtResource("2_0hgt6")
 centered = false
 
 [node name="CanvasSprite" type="Sprite2D" parent="."]
@@ -90,7 +90,7 @@ offset_left = 8.0
 offset_top = 127.0
 offset_right = 59.0
 offset_bottom = 178.0
-icon = ExtResource("2_m27m7")
+icon = ExtResource("3_nkl5c")
 flat = true
 icon_alignment = 1
 expand_icon = true
@@ -101,7 +101,7 @@ offset_left = 9.0
 offset_top = 17.0
 offset_right = 53.0
 offset_bottom = 63.0
-icon = ExtResource("3_ongpc")
+icon = ExtResource("4_a72mu")
 flat = true
 expand_icon = true
 
@@ -111,7 +111,7 @@ offset_left = 9.0
 offset_top = 73.0
 offset_right = 58.0
 offset_bottom = 123.0
-icon = ExtResource("4_4a3wp")
+icon = ExtResource("5_xkn8y")
 flat = true
 expand_icon = true
 
@@ -130,7 +130,7 @@ offset_left = 435.0
 offset_top = 203.0
 offset_right = 629.0
 offset_bottom = 478.35
-script = ExtResource("6_dh2uk")
+script = ExtResource("6_iua2o")
 
 [node name="StartScreen" type="ColorRect" parent="."]
 layout_mode = 0
@@ -138,7 +138,7 @@ offset_left = -6.0
 offset_top = -2.0
 offset_right = 1646.0
 offset_bottom = 994.0
-script = ExtResource("7_s7gqp")
+script = ExtResource("7_k7poc")
 
 [node name="TitleLabel" type="Label" parent="StartScreen"]
 layout_mode = 0
@@ -150,15 +150,6 @@ text = "New Canvas"
 label_settings = SubResource("LabelSettings_kilfh")
 horizontal_alignment = 1
 
-[node name="WidthBox" type="SpinBox" parent="StartScreen"]
-layout_mode = 0
-offset_left = 759.0
-offset_top = 124.0
-offset_right = 880.0
-offset_bottom = 156.0
-max_value = 1000.0
-alignment = 1
-
 [node name="WidthLabel" type="Label" parent="StartScreen"]
 layout_mode = 0
 offset_left = 680.0
@@ -168,7 +159,17 @@ offset_bottom = 169.0
 text = "Width"
 label_settings = SubResource("LabelSettings_bemsk")
 
+[node name="WidthBox" type="SpinBox" parent="StartScreen"]
+layout_mode = 0
+offset_left = 759.0
+offset_top = 124.0
+offset_right = 880.0
+offset_bottom = 156.0
+max_value = 1000.0
+alignment = 1
+
 [node name="HeightLabel" type="Label" parent="StartScreen"]
+layout_mode = 0
 offset_left = 680.0
 offset_top = 171.0
 offset_right = 733.0
@@ -177,6 +178,7 @@ text = "Height"
 label_settings = SubResource("LabelSettings_bemsk")
 
 [node name="HeightBox" type="SpinBox" parent="StartScreen"]
+layout_mode = 0
 offset_left = 761.0
 offset_top = 175.0
 offset_right = 882.0
@@ -196,4 +198,6 @@ text = "OK"
 [connection signal="pressed" from="InspectorRect/ColorRect2/ExportButton" to="." method="_on_export_button_pressed"]
 [connection signal="pressed" from="InspectorRect/ColorRect2/GridButton" to="." method="_on_grid_button_pressed"]
 [connection signal="file_selected" from="ExportDialog" to="." method="_on_file_dialog_file_selected"]
+[connection signal="value_changed" from="StartScreen/WidthBox" to="." method="_on_width_box_value_changed"]
+[connection signal="value_changed" from="StartScreen/HeightBox" to="." method="_on_height_box_value_changed"]
 [connection signal="pressed" from="StartScreen/CreateButton" to="." method="_on_create_button_pressed"]
