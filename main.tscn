@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://c6iv3o6dhkeou"]
+[gd_scene load_steps=11 format=3 uid="uid://c6iv3o6dhkeou"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_dq2d7"]
 [ext_resource type="Texture2D" uid="uid://doe8c2pigmbrj" path="res://icon/download.svg" id="2_m27m7"]
@@ -7,10 +7,15 @@
 [ext_resource type="Texture2D" uid="uid://cq0lfsd2r0wqm" path="res://icon/grid.png" id="4_4a3wp"]
 [ext_resource type="Texture2D" uid="uid://bvrsdlgs6rnn" path="res://icon/checkerboard-pattern.png" id="5_fdmtw"]
 [ext_resource type="Script" path="res://cache_canvas.gd" id="6_dh2uk"]
+[ext_resource type="Script" path="res://start.gd" id="7_s7gqp"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_kilfh"]
 font = ExtResource("3_afd0j")
 font_size = 20
+font_color = Color(0, 0, 0, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_bemsk"]
+font = ExtResource("3_afd0j")
 font_color = Color(0, 0, 0, 1)
 
 [node name="Main" type="Control"]
@@ -31,26 +36,7 @@ texture = ExtResource("5_fdmtw")
 centered = false
 
 [node name="CanvasSprite" type="Sprite2D" parent="."]
-visible = false
 texture_filter = 1
-
-[node name="Start" type="ColorRect" parent="."]
-layout_mode = 0
-offset_left = 314.0
-offset_top = 140.0
-offset_right = 1108.0
-offset_bottom = 696.0
-
-[node name="NewCanvas" type="Label" parent="Start"]
-layout_mode = 0
-offset_left = 174.0
-offset_top = 40.0
-offset_right = 514.0
-offset_bottom = 104.0
-text = "New Canvas"
-label_settings = SubResource("LabelSettings_kilfh")
-horizontal_alignment = 1
-vertical_alignment = 1
 
 [node name="LayerZone" type="ColorRect" parent="."]
 layout_mode = 0
@@ -146,7 +132,68 @@ offset_right = 629.0
 offset_bottom = 478.35
 script = ExtResource("6_dh2uk")
 
+[node name="StartScreen" type="ColorRect" parent="."]
+layout_mode = 0
+offset_left = -6.0
+offset_top = -2.0
+offset_right = 1646.0
+offset_bottom = 994.0
+script = ExtResource("7_s7gqp")
+
+[node name="TitleLabel" type="Label" parent="StartScreen"]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 66.0
+offset_right = 1607.0
+offset_bottom = 510.0
+text = "New Canvas"
+label_settings = SubResource("LabelSettings_kilfh")
+horizontal_alignment = 1
+
+[node name="WidthBox" type="SpinBox" parent="StartScreen"]
+layout_mode = 0
+offset_left = 759.0
+offset_top = 124.0
+offset_right = 880.0
+offset_bottom = 156.0
+max_value = 1000.0
+alignment = 1
+
+[node name="WidthLabel" type="Label" parent="StartScreen"]
+layout_mode = 0
+offset_left = 680.0
+offset_top = 125.0
+offset_right = 733.0
+offset_bottom = 169.0
+text = "Width"
+label_settings = SubResource("LabelSettings_bemsk")
+
+[node name="HeightLabel" type="Label" parent="StartScreen"]
+offset_left = 680.0
+offset_top = 171.0
+offset_right = 733.0
+offset_bottom = 215.0
+text = "Height"
+label_settings = SubResource("LabelSettings_bemsk")
+
+[node name="HeightBox" type="SpinBox" parent="StartScreen"]
+offset_left = 761.0
+offset_top = 175.0
+offset_right = 882.0
+offset_bottom = 207.0
+max_value = 1000.0
+alignment = 1
+
+[node name="CreateButton" type="Button" parent="StartScreen"]
+layout_mode = 0
+offset_left = 742.0
+offset_top = 872.0
+offset_right = 904.0
+offset_bottom = 910.0
+text = "OK"
+
 [connection signal="color_changed" from="InspectorRect/ColorPicker" to="." method="_on_color_picker_color_changed"]
 [connection signal="pressed" from="InspectorRect/ColorRect2/ExportButton" to="." method="_on_export_button_pressed"]
 [connection signal="pressed" from="InspectorRect/ColorRect2/GridButton" to="." method="_on_grid_button_pressed"]
 [connection signal="file_selected" from="ExportDialog" to="." method="_on_file_dialog_file_selected"]
+[connection signal="pressed" from="StartScreen/CreateButton" to="." method="_on_create_button_pressed"]

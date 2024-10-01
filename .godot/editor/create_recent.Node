@@ -1,4 +1,8 @@
+Button
 Label
+SpinBox
+LineEdit
+TextureButton
 ColorRect
 Control
 AcceptDialog
@@ -9,6 +13,3 @@ TextureRect
 Line2D
 VSlider
 Sprite2D
-Button
-FileDialog
-MenuButton

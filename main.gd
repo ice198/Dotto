@@ -9,6 +9,7 @@ extends Control
 @onready var preview_sprite = $PreviewSprite
 @onready var guide_line = $GuideLine
 @onready var cache_canvas = $CacheCanvas
+@onready var start_screen = $StartScreen
 
 # キャンバスの横幅と縦幅(後で開始時に設定できるようにする)
 var canvas_width = 1000
@@ -587,6 +588,10 @@ func _on_grid_button_pressed() -> void:
 		is_grid_on = false
 	else:
 		is_grid_on = true
+
+# 作成ボタンが押された場合
+func _on_create_button_pressed() -> void:
+	start_screen.hide()
 
 """ # マウスでクリックしたところにのみドットを描画する際に再利用
 func _draw():

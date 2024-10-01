@@ -1,9 +1,10 @@
 ea4bc82a6ad023ab7ee23ee620429895
-::res://::1727703370
+::res://::1727772495
+cache_canvas.gd::GDScript::-1::1727707199::0::1::::<>TextureRect<>::
 export_presets.cfg::TextFile::-1::1727623825::0::1::::<><>::
 icon.svg::CompressedTexture2D::2335001591404326798::1726908645::1726908657::1::::<><>::
-main.gd::GDScript::-1::1727626492::0::1::::<>Control<>::
-main.tscn::PackedScene::6966536384637014752::1727625763::0::1::::<><>::res://main.gd<>uid://doe8c2pigmbrj::::res://icon/download.svg<>uid://6qph5b1je0rb::::res://icon/pencil2.svg<>uid://cq0lfsd2r0wqm::::res://icon/grid.png<>uid://bvrsdlgs6rnn::::res://icon/checkerboard-pattern.png
+main.gd::GDScript::-1::1727706008::0::1::::<>Control<>::
+main.tscn::PackedScene::6966536384637014752::1727707999::0::1::::<><>::res://main.gd<>uid://doe8c2pigmbrj::::res://icon/download.svg<>uid://cb3x1gbe7mu0h::::res://font/NotoSansJP-Regular.ttf<>uid://6qph5b1je0rb::::res://icon/pencil2.svg<>uid://cq0lfsd2r0wqm::::res://icon/grid.png<>uid://bvrsdlgs6rnn::::res://icon/checkerboard-pattern.png<>res://cache_canvas.gd
 README.md::TextFile::-1::1727626337::0::1::::<><>::
 ::res://assets/::1727626489
 demo.png::CompressedTexture2D::3442133706243710286::1727625297::1727626489::1::::<><>::
