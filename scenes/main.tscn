@@ -12,11 +12,9 @@
 [sub_resource type="LabelSettings" id="LabelSettings_kilfh"]
 font = ExtResource("8_ymggg")
 font_size = 20
-font_color = Color(0, 0, 0, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_bemsk"]
 font = ExtResource("8_ymggg")
-font_color = Color(0, 0, 0, 1)
 
 [node name="Main" type="Control"]
 texture_filter = 1
@@ -142,13 +140,14 @@ script = ExtResource("7_k7poc")
 
 [node name="TitleLabel" type="Label" parent="StartScreen"]
 layout_mode = 0
-offset_left = 9.0
-offset_top = 66.0
-offset_right = 1607.0
-offset_bottom = 510.0
+offset_left = 698.0
+offset_top = 55.0
+offset_right = 876.0
+offset_bottom = 96.0
 text = "New Canvas"
 label_settings = SubResource("LabelSettings_kilfh")
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="WidthLabel" type="Label" parent="StartScreen"]
 layout_mode = 0

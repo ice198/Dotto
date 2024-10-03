@@ -1,6 +1,2 @@
-res://main.tscn
-res://start.gd
-res://main.gd
 res://scenes/main.tscn
-res://scripts/main.gd
-res://scripts/cache_canvas.gd
+res://scripts/start.gd
