@@ -10,17 +10,13 @@ extends Control
 @onready var guide_line = $GuideLine
 @onready var cache_canvas = $CacheCanvas
 @onready var start_screen = $StartScreen
+@onready var select_zone = $InspectorRect/SelectZone
 
-# キャンバスの横幅と縦幅(後で開始時に設定できるようにする)
 var canvas_width = 1000
 var canvas_height = 1000
-
-# キャンバスをズームした縦幅と横幅
-var dot_size = 1  # 1ドットのサイズ（ピクセル単位）
+var dot_size = 1
 var zoom_width = canvas_width * dot_size
 var zoom_height = canvas_height * dot_size
-
-# プレビュー画面の拡大率
 var preview_zoom_X = 1
 
 # 色の変数
@@ -31,6 +27,9 @@ var color_alpha = 1
 var canvas_color = Color(1, 1, 1, 1) # キャンバスの下地の色
 var color_on = Color(color_red, color_green, color_blue, color_alpha)
 var color_off = Color(1, 1, 1, 1)
+var base_color = Color(0.1, 0.1, 0.1)
+var focus_color = Color(0.3, 0.3, 0.3)
+var accent_color = Color(0, 0, 1)
 
 # グリッドデータを保持
 var grid = []
@@ -60,14 +59,14 @@ var last_mouse_y_point = 0
 var one_before_pixel_x = -1
 var one_before_pixel_y = -1
 
-# マウスの状態
+# 状態管理
 var is_mouse_left_held = false
 var is_mouse_right_held = false
 var is_mouse_wheel_held = false
 var is_mouse_wheel_move = false
 var is_mouse_on_preview = false
-
-# グリッドがonかoffか判定
+var is_main_screen = false
+var is_mode_draw = false
 var is_grid_on = false
 
 # マウスカーソルを設定
@@ -81,11 +80,12 @@ var layers_num = 2
 var guide_line_x = 0
 var guide_line_y = 0
 
-# プレビュー画面の外枠の太さ
+# プレビュー画面の外枠とガイド線の太さ
 var preview_frame_width = 2
-
-# ガイド線の太さ
 var guide_line_width = 2
+
+# セレクトゾーンの幅
+var select_zone_width = 40
 
 # ウィンドウサイズ
 var window_size = 0
@@ -101,9 +101,6 @@ var zoom_correction = 1
 
 # レイヤー関連
 var layer_top_space = 60
-
-# 色設定
-var accent_color = Color.LIGHT_SKY_BLUE
 
 ### 開始時に実行 ###
 func _ready() -> void:
@@ -135,6 +132,10 @@ func _ready() -> void:
 	layer_zone.size = Vector2(layer_zone_width, 10000) # 縦幅はとても長くした
 	layer_zone.position = Vector2(0 , canvas_height * preview_zoom_X + preview_frame_width * 2)
 	
+	select_zone.size = Vector2(select_zone_width, 10000000)
+	select_zone.position = Vector2(-select_zone_width, 0)
+	select_zone.color = focus_color
+	
 	_draw_canvas_sprite(0) # 下地を描画
 	_move_canvas_sprite()
 	_draw_preview_sprite()
@@ -147,8 +148,7 @@ func _process(delta: float) -> void:
 	# DEBUG--------------
 	var fps = str(Engine.get_frames_per_second())
 	#print("", fps)
-	#print("",is_mouse_wheel_move)
-
+	print("",is_mode_draw)
 	_draw_preview_frame()
 	#--------------------
 	
@@ -159,43 +159,44 @@ func _process(delta: float) -> void:
 	window_size = get_viewport().size
 	global_mouse_x_point = get_global_mouse_position().x
 	global_mouse_y_point = get_global_mouse_position().y
-
+	
 	# キャンバス上でのマウスカーソルの座標を取得
 	mouse_x_point = global_mouse_x_point - offset_x
 	mouse_y_point = global_mouse_y_point - offset_y
 	
 	# マウスが左クリックされたらドットを描画
 	if is_mouse_left_held:
-		if not is_mouse_right_held: # ドラッグ中は無効
-			if mouse_x_point >= 0 and mouse_x_point < zoom_width and mouse_y_point >= 0 and mouse_y_point < zoom_height:
-				# 書き始めた場合
-				if one_before_pixel_x < 0:
-					var grid_x = int(mouse_x_point / dot_size)
-					var grid_y = int(mouse_y_point / dot_size)
+		if is_mode_draw:
+			if not is_mouse_right_held: # ドラッグ中は無効
+				if mouse_x_point >= 0 and mouse_x_point < zoom_width and mouse_y_point >= 0 and mouse_y_point < zoom_height:
+					# 書き始めた場合
+					if one_before_pixel_x < 0:
+						var grid_x = int(mouse_x_point / dot_size)
+						var grid_y = int(mouse_y_point / dot_size)
 						
-					# グリッドに色を設定
-					grid[current_layer_index][grid_x][grid_y] = color_on
+						# グリッドに色を設定
+						grid[current_layer_index][grid_x][grid_y] = color_on
 						
-					one_before_pixel_x = grid_x
-					one_before_pixel_y = grid_y
-				else:
-					var grid_x = int(mouse_x_point / dot_size)
-					var grid_y = int(mouse_y_point / dot_size)
+						one_before_pixel_x = grid_x
+						one_before_pixel_y = grid_y
+					else:
+						var grid_x = int(mouse_x_point / dot_size)
+						var grid_y = int(mouse_y_point / dot_size)
 						
-					grid[current_layer_index][grid_x][grid_y] = color_on
+						grid[current_layer_index][grid_x][grid_y] = color_on
 				
-					# 点と点の間を線で補完
-					var start_point = Vector2(one_before_pixel_x,one_before_pixel_y)
-					var end_point = Vector2(grid_x,grid_y)
-					var between_pixels = _get_line_pixels(start_point,end_point) # 2点間を結ぶ線に触れているドットの座標を配列で取得
-					for i in range(between_pixels.size()):
-						var between_pixel_x = int(between_pixels[i][0])
-						var between_pixel_y = int(between_pixels[i][1])
+						# 点と点の間を線で補完
+						var start_point = Vector2(one_before_pixel_x,one_before_pixel_y)
+						var end_point = Vector2(grid_x,grid_y)
+						var between_pixels = _get_line_pixels(start_point,end_point) # 2点間を結ぶ線に触れているドットの座標を配列で取得
+						for i in range(between_pixels.size()):
+							var between_pixel_x = int(between_pixels[i][0])
+							var between_pixel_y = int(between_pixels[i][1])
 							
-						grid[current_layer_index][between_pixel_x][between_pixel_y] = color_on
+							grid[current_layer_index][between_pixel_x][between_pixel_y] = color_on
 						
-					one_before_pixel_x = grid_x
-					one_before_pixel_y = grid_y
+						one_before_pixel_x = grid_x
+						one_before_pixel_y = grid_y
 	
 	# マウスの右クリックでドラッグ
 	if is_mouse_right_held:
@@ -222,6 +223,12 @@ func _process(delta: float) -> void:
 		is_mouse_on_preview = true
 	else:
 		is_mouse_on_preview = false
+	
+	# マウスがキャンバスエリアにあるか判定
+	if is_main_screen and layer_zone_width < global_mouse_x_point and global_mouse_x_point < window_size.x - (inspector_zone_width + select_zone_width):
+		is_mode_draw = true
+	else:
+		is_mode_draw = false
 	
 	queue_redraw()
 
@@ -552,9 +559,9 @@ func _on_grid_button_pressed() -> void:
 	else:
 		is_grid_on = true
 
-# 作成ボタンが押された場合
 func _on_create_button_pressed() -> void:
 	start_screen.hide()
+	is_main_screen = true
 
 func _on_width_box_value_changed(value: float) -> void:
 	canvas_width = value

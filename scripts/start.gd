@@ -13,6 +13,8 @@ var width_box_position_x = 70
 var width_box_position_y = 130
 var width_height_items_space = 40 # 2つのラベル間の縦の幅
 var label_between_box_space = 80 # ラベルとテキストボックスの間の距離
+var create_button_x_space = 80 # OKボタンを左に少しずらす
+var create_button_y_space = 90 # OKボタンの下からの位置
 
 
 # Called when the node enters the scene tree for the first time.
@@ -46,3 +48,4 @@ func _update_layout():
 	width_box.position = Vector2(window_width / 2 - width_label_width - width_box_position_x + label_between_box_space, width_box_position_y)
 	height_box.position = Vector2(window_width / 2 - width_label_width - width_box_position_x + label_between_box_space, width_box_position_y + width_height_items_space)
 	# 作成ボタンの位置を更新
+	create_button.position = Vector2(window_width / 2 - create_button_x_space, window_height - create_button_y_space)
