@@ -1,7 +1,7 @@
 extends Control
 
-@onready var inspector_rect = $InspectorRect
-@onready var color_picker = $InspectorRect/ColorPicker
+@onready var inspector_zone = $InspectorZone
+@onready var color_picker = $InspectorZone/ColorPicker
 @onready var export_dialog = $ExportDialog
 @onready var canvas_sprite = $CanvasSprite
 @onready var layer_zone = $LayerZone
@@ -10,185 +10,163 @@ extends Control
 @onready var guide_line = $GuideLine
 @onready var cache_canvas = $CacheCanvas
 @onready var start_screen = $StartScreen
-@onready var select_zone = $InspectorRect/SelectZone
+@onready var pencil_tool = $InspectorZone/PencilTool
+@onready var line_tool = $InspectorZone/LineTool
 
+# Layout
 var canvas_width = 1000
 var canvas_height = 1000
+var offset_x = 0
+var offset_y = 0
+var preview_frame_width = 2
+var guide_line_width = 2
+var tool_panel_width = 40
+var inspector_zone_width = 350
+var layer_zone_width = 200
+var layer_top_space = 60
+
+# Canvas
 var dot_size = 1
 var zoom_width = canvas_width * dot_size
 var zoom_height = canvas_height * dot_size
-var preview_zoom_X = 1
 
-# 色の変数
+# Preview
+var preview_zoom_X = 1
+var preview_zoom_sensitivity = 2
+var zoom_correction = 1
+var guide_line_x = 0
+var guide_line_y = 0
+
+# Color
 var color_red = 0
 var color_green = 0
 var color_blue = 0
 var color_alpha = 1
-var canvas_color = Color(1, 1, 1, 1) # キャンバスの下地の色
+var canvas_color = Color(1, 1, 1, 1)
 var color_on = Color(color_red, color_green, color_blue, color_alpha)
 var color_off = Color(1, 1, 1, 1)
 var base_color = Color(0.1, 0.1, 0.1)
-var focus_color = Color(0.3, 0.3, 0.3)
+var focus_color = Color(0.2, 0.2, 0.2)
 var accent_color = Color(0, 0, 1)
 
-# グリッドデータを保持
+# Grid data
 var grid = []
 var cache_grid = []
 
-# オフセットを設定 (最初はキャンバスが中心に来るようにする)
-var offset_x = (1600 - (350 + canvas_width)) / 2
-var offset_y = (950 - canvas_height) / 2
-
-# キャンバス上でのマウスカーソルの座標
-var mouse_x_point = 0
-var mouse_y_point = 0
-
-# GUI上でのマウスカーソルの座標
+# Mouse data
+var drag_cursor = preload("res://icon/drag.png")
+var canvas_mouse_x = 0
+var canvas_mouse_y = 0
 var global_mouse_x_point = 0
 var global_mouse_y_point = 0
-
-# ドラッグ用のマウスが掴まれた座標(キャンバス上じゃなくてもいい)
 var last_drag_mouse_x = 0
 var last_drag_mouse_y = 0
-
-# 最後に取得したマウスカーソルの座標
 var last_mouse_x_point = 0
 var last_mouse_y_point = 0
 
-# 2点間を線で補完するための開始地点の座標(等倍サイズ)
+# Coordinates of the starting point for interpolating a line between two points (same size)
 var one_before_pixel_x = -1
 var one_before_pixel_y = -1
 
-# 状態管理
+# State
 var is_mouse_left_held = false
 var is_mouse_right_held = false
 var is_mouse_wheel_held = false
 var is_mouse_wheel_move = false
 var is_mouse_on_preview = false
-var is_main_screen = false
+var is_space_key_pressed = false
 var is_mode_draw = false
+var is_pencil_mode = false
+var is_line_mode = false
 var is_grid_on = false
+var on_main_screen = false
+var on_tool_panel = false
 
-# マウスカーソルを設定
-var drag_cursor = preload("res://icon/drag.png")
-
-# レイヤーを保持する配列
-var current_layer_index = 1 #0は下地
+# Layer
+var current_layer_index = 1 # 0 is base 
 var layers_num = 2
 
-# プレビュー画面のガイド線の座標
-var guide_line_x = 0
-var guide_line_y = 0
-
-# プレビュー画面の外枠とガイド線の太さ
-var preview_frame_width = 2
-var guide_line_width = 2
-
-# セレクトゾーンの幅
-var select_zone_width = 40
-
-# ウィンドウサイズ
+# window data
 var window_size = 0
-#var window_width = window_size.x
-#var window_height = window_size.y
 
-# ゾーンの数値
-var inspector_zone_width = 350
-var layer_zone_width = 200
 
-# 小さすぎるキャンバスを補正
-var zoom_correction = 1
-
-# レイヤー関連
-var layer_top_space = 60
-
-### 開始時に実行 ###
-func _ready() -> void:
-	# グリッドの初期化
-	for layer in range(layers_num):
-		var layer_grid = []  # 新しいレイヤーを初期化
-		for x in range(canvas_width):
-			layer_grid.append([])  # 新しい行を追加
-			for y in range(canvas_height):
-				layer_grid[x].append(color_off)  # 色データを追加
-		grid.append(layer_grid)  # レイヤーをグリッドに追加
+func _on_create_button_pressed() -> void:
+	start_screen.hide()
+	on_main_screen = true
 	
-	# プレビュー画面の初期の拡大率を計算(縦横ともに200px以下か400px以上だった場合)
-	if canvas_width <= 200 and canvas_height <= 300:
-		if canvas_width > canvas_height:
-			preview_zoom_X = 200.0 / canvas_width
-			zoom_correction = preview_zoom_X
-		else:
-			preview_zoom_X = 200.0 / canvas_height
-			zoom_correction = preview_zoom_X
-			
-	if canvas_width >= 400 and canvas_height >= 400:
-		if canvas_width > canvas_height:
-			preview_zoom_X = 1.0 / (canvas_width / layer_zone_width)
-		else:
-			preview_zoom_X = 1.0 / (canvas_width / layer_zone_width)
+	# Calculate defolt preview scale
+	preview_zoom_X = (layer_zone_width - guide_line_width * 2) / canvas_width
+	zoom_correction = preview_zoom_X * preview_zoom_sensitivity
 	
-	# レイヤーゾーンを初期化
-	layer_zone.size = Vector2(layer_zone_width, 10000) # 縦幅はとても長くした
-	layer_zone.position = Vector2(0 , canvas_height * preview_zoom_X + preview_frame_width * 2)
-	
-	select_zone.size = Vector2(select_zone_width, 10000000)
-	select_zone.position = Vector2(-select_zone_width, 0)
-	select_zone.color = focus_color
-	
-	_draw_canvas_sprite(0) # 下地を描画
+	_draw_canvas_sprite(0)
 	_move_canvas_sprite()
 	_draw_preview_sprite()
 	_move_preview_sprite()
-	
-	queue_redraw()
 
-### 常に実行 ###
+# Called when the node enters the scene tree for the first time.
+func _ready() -> void:
+	# Initialize grid
+	for layer in range(layers_num):
+		var layer_grid = []
+		for x in range(canvas_width):
+			layer_grid.append([])
+			for y in range(canvas_height):
+				layer_grid[x].append(color_off)
+		grid.append(layer_grid)
+	
+	inspector_zone.color = focus_color
+	
+	layer_zone.size = Vector2(layer_zone_width, 10000)
+	layer_zone.position = Vector2(0 , canvas_height * preview_zoom_X + preview_frame_width * 2)
+	layer_zone.color = base_color 
+	
+	pencil_tool.size = Vector2(tool_panel_width, tool_panel_width)
+	pencil_tool.position = Vector2(-tool_panel_width, 0)
+	pencil_tool.color = focus_color
+	
+	line_tool.size = Vector2(tool_panel_width, tool_panel_width)
+	line_tool.position = Vector2(-tool_panel_width, tool_panel_width)
+	line_tool.color = base_color
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	# DEBUG--------------
 	var fps = str(Engine.get_frames_per_second())
 	#print("", fps)
-	print("",is_mode_draw)
-	_draw_preview_frame()
+	print("",is_mouse_on_preview)
 	#--------------------
-	
-	_update_color_picker_position()
-	_update_layer_position()
-	_draw_guide_line()
-	
 	window_size = get_viewport().size
+	
 	global_mouse_x_point = get_global_mouse_position().x
 	global_mouse_y_point = get_global_mouse_position().y
 	
-	# キャンバス上でのマウスカーソルの座標を取得
-	mouse_x_point = global_mouse_x_point - offset_x
-	mouse_y_point = global_mouse_y_point - offset_y
+	canvas_mouse_x = global_mouse_x_point - offset_x
+	canvas_mouse_y = global_mouse_y_point - offset_y
 	
-	# マウスが左クリックされたらドットを描画
+	# Draw when mouse is left clicked
 	if is_mouse_left_held:
 		if is_mode_draw:
-			if not is_mouse_right_held: # ドラッグ中は無効
-				if mouse_x_point >= 0 and mouse_x_point < zoom_width and mouse_y_point >= 0 and mouse_y_point < zoom_height:
-					# 書き始めた場合
+			if not is_mouse_right_held:
+				if canvas_mouse_x >= 0 and canvas_mouse_x < zoom_width and canvas_mouse_y >= 0 and canvas_mouse_y < zoom_height:
+					# When writing for the first time
 					if one_before_pixel_x < 0:
-						var grid_x = int(mouse_x_point / dot_size)
-						var grid_y = int(mouse_y_point / dot_size)
+						var grid_x = int(canvas_mouse_x / dot_size)
+						var grid_y = int(canvas_mouse_y / dot_size)
 						
-						# グリッドに色を設定
 						grid[current_layer_index][grid_x][grid_y] = color_on
 						
 						one_before_pixel_x = grid_x
 						one_before_pixel_y = grid_y
 					else:
-						var grid_x = int(mouse_x_point / dot_size)
-						var grid_y = int(mouse_y_point / dot_size)
+						var grid_x = int(canvas_mouse_x / dot_size)
+						var grid_y = int(canvas_mouse_y / dot_size)
 						
 						grid[current_layer_index][grid_x][grid_y] = color_on
 				
-						# 点と点の間を線で補完
+						# Fill in lines between points
 						var start_point = Vector2(one_before_pixel_x,one_before_pixel_y)
 						var end_point = Vector2(grid_x,grid_y)
-						var between_pixels = _get_line_pixels(start_point,end_point) # 2点間を結ぶ線に触れているドットの座標を配列で取得
+						var between_pixels = _get_line_pixels(start_point,end_point)
 						for i in range(between_pixels.size()):
 							var between_pixel_x = int(between_pixels[i][0])
 							var between_pixel_y = int(between_pixels[i][1])
@@ -198,67 +176,68 @@ func _process(delta: float) -> void:
 						one_before_pixel_x = grid_x
 						one_before_pixel_y = grid_y
 	
-	# マウスの右クリックでドラッグ
+	# Drag when mouse is right clicked
 	if is_mouse_right_held:
-		# ホールド時の移動量
-		var delta_move_x = mouse_x_point - last_drag_mouse_x
-		var delta_move_y = mouse_y_point - last_drag_mouse_y
+		var delta_move_x = canvas_mouse_x - last_drag_mouse_x
+		var delta_move_y = canvas_mouse_y - last_drag_mouse_y
 		
 		offset_x += delta_move_x
 		offset_y += delta_move_y
 		
-		Input.set_custom_mouse_cursor(drag_cursor) #ドラッグカーソルに設定
-		
+		Input.set_custom_mouse_cursor(drag_cursor)
 		_move_canvas_sprite()
 	else:
-		Input.set_custom_mouse_cursor(null)  # ドラッグカーソルを解除
+		Input.set_custom_mouse_cursor(null)
 		_move_canvas_sprite()
 	
-	# プレビュー画面にマウスがあった場合の処理
 	if is_mouse_on_preview:
 		_move_preview_sprite()
 	
-	# マウスカーソルがプレビュー画面上にあるか判定
+	# Determine whether the mouse cursor is on the preview screen
 	if global_mouse_x_point <= canvas_width * preview_zoom_X + preview_frame_width * 2 and global_mouse_y_point <= canvas_height * preview_zoom_X + preview_frame_width * 2:
 		is_mouse_on_preview = true
 	else:
 		is_mouse_on_preview = false
 	
-	# マウスがキャンバスエリアにあるか判定
-	if is_main_screen and layer_zone_width < global_mouse_x_point and global_mouse_x_point < window_size.x - (inspector_zone_width + select_zone_width):
+	# Determine whether the mouse cursor is on the canvas
+	if on_main_screen and layer_zone_width < global_mouse_x_point and global_mouse_x_point < window_size.x - (inspector_zone_width + tool_panel_width):
 		is_mode_draw = true
 	else:
 		is_mode_draw = false
 	
-	queue_redraw()
-
-### 入力を検知して判定を更新 ###
-func _input(event):
-	var zoom_increment = 1 # 拡大は整数倍
+	# Determine whether the mouse cursor is on the preview screen
+	if window_size.x - (inspector_zone_width + tool_panel_width) < global_mouse_x_point and global_mouse_x_point < window_size.x - inspector_zone_width:
+		on_tool_panel = true
+	else:
+		on_tool_panel = false
 	
-	# マウスからの入力
+	_update_inspector_position()
+	_update_layer_position()
+	_draw_guide_line()
+	_draw_preview_frame()
+
+func _input(event):
+	var zoom_increment = 1
+	var canvas_move_speed_sensitivity = 30
+	
 	if event is InputEventMouseButton:
-		# プレビュー画面にマウスがあった場合はプレビューを拡大縮小
-		if is_mouse_on_preview: 
+		# Change preview scale
+		if is_mouse_on_preview:
 			if event.button_index == MOUSE_BUTTON_WHEEL_UP:
 				is_mouse_wheel_move = true
 				preview_zoom_X += 0.01 * zoom_correction
 				var a = canvas_width * preview_zoom_X
 				var b = (canvas_width * preview_zoom_X) + (preview_frame_width * 2)
 				var preview_frame_scale_x =  preview_zoom_X * (b / a)
-				#print("",a)
-				#preview_zone.scale = Vector2(preview_frame_scale_x ,preview_zoom_X)
-				#_move_canvas_sprite(current_layer_index)
+				
 			elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-				is_mouse_wheel_move = false
-				#dot_size = max(1, dot_size - increment)  # 下に回した場合は減少（最小1）
+				is_mouse_wheel_move = true
+				dot_size = max(1, dot_size - zoom_increment)
 				preview_zoom_X -= 0.01 * zoom_correction
-				#preview_zone.scale = Vector2(preview_zoom_X,preview_zoom_X)
-				#_move_canvas_sprite(current_layer_index)
 			
-		# マウスホイールを回して拡大縮小
-		if not is_mouse_right_held: # ドラッグしているときは拡大縮小とペイントを無効にする
-			if not is_mouse_on_preview: # マウスがプレビュー上にあった場合は無効
+		# Change canvas scale
+		if is_mode_draw and not is_mouse_right_held:
+			if not is_mouse_on_preview:
 				if event.button_index == MOUSE_BUTTON_WHEEL_UP:
 					is_mouse_wheel_move = true
 					dot_size += zoom_increment
@@ -266,68 +245,85 @@ func _input(event):
 					_move_canvas_sprite()
 				
 				elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-					is_mouse_wheel_move = false
-					dot_size = max(1, dot_size - zoom_increment)  # 下に回した場合は減少（最小1）
-					_update_grid_size()  # グリッドのサイズを更新
+					is_mouse_wheel_move = true
+					dot_size = max(1, dot_size - zoom_increment)
+					_update_grid_size()
 					_move_canvas_sprite()
 			
-		# マウスホイールが押された場合の処理（後で追加）
+		# When the mouse wheel is scrolled
 		if Input.is_action_pressed("MOUSE_BUTTON_WHEEL"):
 			is_mouse_wheel_held = true
-			_add_layer()
 		elif Input.is_action_just_released("MOUSE_BUTTON_WHEEL"):
 			is_mouse_wheel_held = false
 		
-		# マウスの左クリックがホールドされているか判定
+		# When mouse is left clicked
 		if event.is_action_pressed("MOUSE_L"):
 			is_mouse_left_held = true
-			one_before_pixel_x = -1 # 初めて書くと設定
+			one_before_pixel_x = -1
 			one_before_pixel_y = -1
 			_draw_canvas_sprite(0)
+			
+			if on_tool_panel:
+				if global_mouse_y_point < tool_panel_width:
+					pencil_tool.color = focus_color
+					line_tool.color = base_color
+					is_pencil_mode = true
+					is_line_mode = false
+				elif tool_panel_width < global_mouse_y_point and global_mouse_y_point < tool_panel_width * 2:
+					pencil_tool.color = base_color
+					line_tool.color = focus_color
+					is_pencil_mode = false
+					is_line_mode = true
+
 		elif event.is_action_released("MOUSE_L"):
 			is_mouse_left_held = false
-			one_before_pixel_x = -1 # マウスを話したと設定
+			one_before_pixel_x = -1
 			one_before_pixel_y = -1
 		
-		# マウスの右クリックがホールドされているか判定
+		# When mouse is right clicked
 		if event.is_action_pressed("MOUSE_R"):
 			is_mouse_right_held = true
-			last_drag_mouse_x = get_global_mouse_position().x - offset_x # delta_move_x,yが最初から0になるようにする
+			last_drag_mouse_x = get_global_mouse_position().x - offset_x
 			last_drag_mouse_y = get_global_mouse_position().y - offset_y
-			
 		elif event.is_action_released("MOUSE_R"):
 			is_mouse_right_held = false
 			
-		# 左クリックが離された瞬間に描画を更新
+		# Update drawing when left click is released
 		const BUTTON_RIGHT = 1
 		if event is InputEventMouseButton:
 			if event.button_index == BUTTON_RIGHT and not event.pressed:
 				_draw_canvas_sprite(current_layer_index)
 				_draw_preview_sprite()
-			
-	# キーボードからの入力
+	
 	if event is InputEventKey:
-		# オフセットを変更してキャンバスを移動
-		var move_speed = 30 # 感度
 		if Input.is_action_pressed("KEY_LEFT"):
-			offset_x += move_speed
+			offset_x += canvas_move_speed_sensitivity
 			_move_canvas_sprite()
 		if Input.is_action_pressed("KEY_RIGHT"):
-			offset_x -= move_speed
+			offset_x -= canvas_move_speed_sensitivity
 			_move_canvas_sprite()
 		if Input.is_action_pressed("KEY_UP"):
-			offset_y += move_speed
+			offset_y += canvas_move_speed_sensitivity
 			_move_canvas_sprite()
 		if Input.is_action_pressed("KEY_DOWN"):
-			offset_y -= move_speed
+			offset_y -= canvas_move_speed_sensitivity
 			_move_canvas_sprite()
+		
+		if Input.is_action_pressed("SPACE_KEY"):
+			is_space_key_pressed = true
+		else:
+			is_space_key_pressed = false
 
-# グリッドのサイズを更新
 func _update_grid_size():
 	zoom_width = canvas_width * dot_size
 	zoom_height = canvas_height * dot_size
 
-# PNGとして保存
+func _update_inspector_position():
+	inspector_zone.position = Vector2(window_size.x - inspector_zone_width, 0)
+
+func _update_layer_position():
+	layer_zone.position = Vector2(0, canvas_height * preview_zoom_X + preview_frame_width * 2)
+
 func _save_as_png(path: String):
 	var img = Image.new()
 	img = img.create(canvas_width, canvas_height, false, Image.FORMAT_RGBA8)
@@ -338,16 +334,7 @@ func _save_as_png(path: String):
 			
 	img.save_png(path)
 
-# ウィンドウのサイズに合わせてカラーピッカーの位置を変更
-func _update_color_picker_position():
-	# ウィンドウサイズを取得
-	var window_size = get_viewport().size
-	var window_width = window_size.x
-	var window_height = window_size.y
-	
-	inspector_rect.position = Vector2(window_width - inspector_zone_width, 0)
-
-# 2点間を結ぶ線を計算
+# Calculate the coordinates of the dots touching the line connecting two points in an array
 func _get_line_pixels(start: Vector2, end: Vector2) -> Array:
 	var cells = []
 	var x1 = int(start.x)
@@ -359,9 +346,9 @@ func _get_line_pixels(start: Vector2, end: Vector2) -> Array:
 	var sx = 1 if x1 < x2 else -1
 	var sy = 1 if y1 < y2 else -1
 	var err = dx - dy
-
+	
 	while true:
-		cells.append(Vector2(x1, y1))  # 現在のマス目を追加
+		cells.append(Vector2(x1, y1))
 		if x1 == x2 and y1 == y2:
 			break
 		var err2 = err * 2
@@ -373,7 +360,6 @@ func _get_line_pixels(start: Vector2, end: Vector2) -> Array:
 			y1 += sy
 	return cells
 
-# キャンバスを描画
 func _draw_canvas_sprite(current_layer_index):
 	var canvas_img = Image.new()
 	canvas_img = canvas_img.create(canvas_width, canvas_height, false, Image.FORMAT_RGBA8)
@@ -385,13 +371,11 @@ func _draw_canvas_sprite(current_layer_index):
 	var canvas_image_texture = ImageTexture.create_from_image(canvas_img)
 	canvas_sprite.texture = canvas_image_texture
 
-# キャンバスを移動
 func _move_canvas_sprite():
 	canvas_sprite.scale = (Vector2(dot_size, dot_size))
 	canvas_sprite.position.x = offset_x + (canvas_width / 2) * dot_size
 	canvas_sprite.position.y = offset_y + (canvas_height / 2) * dot_size
 
-# プレビューを描画
 func _draw_preview_sprite():
 	var preview_img = Image.new()
 	preview_img = preview_img.create(canvas_width, canvas_height, false, Image.FORMAT_RGBA8)
@@ -403,13 +387,11 @@ func _draw_preview_sprite():
 	var preview_image_texture = ImageTexture.create_from_image(preview_img)
 	preview_sprite.texture = preview_image_texture
 
-# プレビューを移動
 func _move_preview_sprite():
 	preview_sprite.scale = (Vector2(preview_zoom_X, preview_zoom_X))
 	preview_sprite.position.x = (canvas_width / 2) * preview_zoom_X + preview_frame_width
 	preview_sprite.position.y = (canvas_height / 2) * preview_zoom_X + preview_frame_width
 
-# プレビューの外枠を表示
 func _draw_preview_frame():
 	var top_left_x = preview_frame_width / 2
 	var top_left_y = preview_frame_width / 2
@@ -421,11 +403,11 @@ func _draw_preview_frame():
 	var bottom_left_y = canvas_height * preview_zoom_X + preview_frame_width * 1.5
 	
 	var points = [
-		Vector2(top_left_x, top_left_y),  # 左上
-		Vector2(top_right_x, top_right_y), # 右上
-		Vector2(bottom_right_x, bottom_right_y),# 右下
-		Vector2(bottom_left_x, bottom_left_y), # 左下
-		Vector2(top_left_x, top_left_y - preview_frame_width / 2)   # 左上に戻る なぜかy座標は幅の半分の値を引く
+		Vector2(top_left_x, top_left_y),
+		Vector2(top_right_x, top_right_y),
+		Vector2(bottom_right_x, bottom_right_y),
+		Vector2(bottom_left_x, bottom_left_y),
+		Vector2(top_left_x, top_left_y - preview_frame_width / 2)
 	]
 	
 	preview_frame.points = points
@@ -438,7 +420,6 @@ func _draw_preview_frame():
 		
 	preview_frame.default_color = preview_frame_color
 
-# プレビューのガイド線を表示
 func _draw_guide_line():
 	var top_left_x = guide_line_width / 2
 	var top_left_y = guide_line_width / 2
@@ -473,29 +454,24 @@ func _draw_guide_line():
 		bottom_right_y = (canvas_height - ((offset_y + canvas_height * dot_size) - window_height) / dot_size) * preview_zoom_X
 		guide_line.default_color = guide_line_color
 	
+	# Make it transparent if the whole thing is visible
 	if offset_x >= layer_zone_width and offset_y + canvas_height * dot_size <= window_height and offset_x + canvas_width * dot_size <= window_width - inspector_zone_width and offset_y > 0:
-		guide_line.default_color = Color(0, 1, 0 ,0) # 全体が表示されていた場合は透明にする
+		guide_line.default_color = Color(0, 1, 0 ,0)
 	
 	var points = [
-		Vector2(top_left_x, top_left_y),  # 左上
-		Vector2(top_right_x, top_right_y), # 右上
-		Vector2(bottom_right_x, bottom_right_y),# 右下
-		Vector2(bottom_left_x, bottom_left_y), # 左下
-		Vector2(top_left_x, top_left_y - guide_line_width / 2 ) # 左上に戻る なぜかy座標は幅の半分の値を引く
+		Vector2(top_left_x, top_left_y),
+		Vector2(top_right_x, top_right_y),
+		Vector2(bottom_right_x, bottom_right_y),
+		Vector2(bottom_left_x, bottom_left_y),
+		Vector2(top_left_x, top_left_y - guide_line_width / 2 )
 	]
 	
 	guide_line.points = points
 	guide_line.width = guide_line_width
 
-# レイヤーの位置を更新
-func _update_layer_position():
-	layer_zone.position = Vector2(0, canvas_height * preview_zoom_X + preview_frame_width * 2)
-
-# レイヤーを作成する関数
 func _add_layer():
 	layers_num += 1
 
-	# グリッドの初期化
 	#for layer in range(layers_num):
 	var layer_grid = []  # 新しいレイヤーを初期化
 	for x in range(canvas_width):
@@ -526,16 +502,13 @@ func _add_layer():
 	
 	layer_zone.add_child(layer_splite)
 
-# レイヤーを切り替える関数
 func _switch_layer():
 	#if index >= 0 and index < layers.size():
 	current_layer_index = current_layer_index + 1#index
 
-# レイヤーが追加されたときにレイヤー画面を更新
 func _update_layer_zone():
 	pass
 
-# カラーピッカーから色を取得
 func _on_color_picker_color_changed(color: Color) -> void:
 	color_red = color.r
 	color_green = color.g
@@ -543,25 +516,18 @@ func _on_color_picker_color_changed(color: Color) -> void:
 	color_alpha = color.a
 	color_on = Color(color_red, color_green ,color_blue ,color_alpha)
 
-# エクスポートボタンが押された場合
 func _on_export_button_pressed() -> void:	
 	export_dialog.show()
 
-# エクスポートダイアログからパスを取得
 func _on_file_dialog_file_selected(path: String) -> void:
 	path = path + ".png"
 	_save_as_png(path)
 
-# グリッドモードのonとoffを切り替える
 func _on_grid_button_pressed() -> void:
 	if is_grid_on:
 		is_grid_on = false
 	else:
 		is_grid_on = true
-
-func _on_create_button_pressed() -> void:
-	start_screen.hide()
-	is_main_screen = true
 
 func _on_width_box_value_changed(value: float) -> void:
 	canvas_width = value
