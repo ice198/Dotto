@@ -1,2 +1,4 @@
 res://scenes/main.tscn
 res://scripts/main.gd
+res://scripts/start.gd
+res://scripts/cache_canvas.gd

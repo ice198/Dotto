@@ -471,14 +471,13 @@ func _draw_guide_line():
 
 func _add_layer():
 	layers_num += 1
-
 	#for layer in range(layers_num):
-	var layer_grid = []  # 新しいレイヤーを初期化
+	var layer_grid = []
 	for x in range(canvas_width):
-		layer_grid.append([])  # 新しい行を追加
+		layer_grid.append([])
 		for y in range(canvas_height):
-			layer_grid[x].append(color_off)  # 色データを追加
-	grid.append(layer_grid)  # レイヤーをグリッドに追加
+			layer_grid[x].append(color_off)
+	grid.append(layer_grid)
 
 	var layer_splite = Sprite2D.new()
 	var layer_img = Image.new()
