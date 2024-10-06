@@ -12,6 +12,9 @@ extends Control
 @onready var start_screen = $StartScreen
 @onready var pencil_tool = $InspectorZone/PencilTool
 @onready var line_tool = $InspectorZone/LineTool
+@onready var color_palette = $InspectorZone/ColorPalette
+@onready var color_palette_tool = $InspectorZone/ColorPaletteTool
+@onready var color_focus_line = $InspectorZone/ColorPalette/ColorFocusLine
 
 # Layout
 var canvas_width = 1000
@@ -22,8 +25,13 @@ var preview_frame_width = 2
 var guide_line_width = 2
 var tool_panel_width = 40
 var inspector_zone_width = 350
+var inspector_zone_height = 550
 var layer_zone_width = 200
 var layer_top_space = 60
+var color_piece_scale = 22
+var color_piece_space = 4
+var color_focus_frame_width = 2
+var color_palette_outer_space = 8
 
 # Canvas
 var dot_size = 1
@@ -81,6 +89,7 @@ var is_line_mode = false
 var is_grid_on = false
 var on_main_screen = false
 var on_tool_panel = false
+var on_color_palette = false
 
 # Layer
 var current_layer_index = 1 # 0 is base 
@@ -88,7 +97,6 @@ var layers_num = 2
 
 # window data
 var window_size = 0
-
 
 func _on_create_button_pressed() -> void:
 	start_screen.hide()
@@ -127,13 +135,27 @@ func _ready() -> void:
 	line_tool.size = Vector2(tool_panel_width, tool_panel_width)
 	line_tool.position = Vector2(-tool_panel_width, tool_panel_width)
 	line_tool.color = base_color
+	
+	color_palette_tool.size = Vector2(tool_panel_width, tool_panel_width)
+	color_palette_tool.position = Vector2(-tool_panel_width, inspector_zone_height)
+	color_palette_tool.color = base_color
+	
+	color_palette.size = Vector2(inspector_zone_width, 1000)
+	color_palette.position = Vector2(0, inspector_zone_height)
+	color_palette.color = base_color
+	
+	for i in range(22):
+		var color = get_node("InspectorZone/ColorPalette/Color" + str(i))
+		color.size = Vector2(color_piece_scale, color_piece_scale)
+		color.position = Vector2(color_palette_outer_space + (color_piece_scale + color_piece_space) * (i % 13), color_palette_outer_space + (color_piece_scale + color_piece_space) * (i / 13))
+		color.color = Color.WHITE
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	# DEBUG--------------
 	var fps = str(Engine.get_frames_per_second())
 	#print("", fps)
-	print("",is_mouse_on_preview)
+	#print("",on_color_palette)
 	#--------------------
 	window_size = get_viewport().size
 	
@@ -143,7 +165,7 @@ func _process(delta: float) -> void:
 	canvas_mouse_x = global_mouse_x_point - offset_x
 	canvas_mouse_y = global_mouse_y_point - offset_y
 	
-	# Draw when mouse is left clicked
+	# When mouse is left clicked
 	if is_mouse_left_held:
 		if is_mode_draw:
 			if not is_mouse_right_held:
@@ -175,6 +197,14 @@ func _process(delta: float) -> void:
 						
 						one_before_pixel_x = grid_x
 						one_before_pixel_y = grid_y
+		
+		if on_color_palette:
+			var color_palette_mouse_x = global_mouse_x_point - (window_size.x - inspector_zone_width) - 6
+			var color_palette_mouse_y = global_mouse_y_point - inspector_zone_height - 6
+			var x_th_color_piece = int(color_palette_mouse_x / (color_piece_scale + color_piece_space)) + 1
+			var y_th_color_piece = int(color_palette_mouse_y / (color_piece_scale + color_piece_space)) + 1
+			
+			_draw_color_palette_focus_frame(x_th_color_piece, y_th_color_piece)
 	
 	# Drag when mouse is right clicked
 	if is_mouse_right_held:
@@ -211,6 +241,12 @@ func _process(delta: float) -> void:
 	else:
 		on_tool_panel = false
 	
+	# Determine whether the mouse cursor is on the color palette
+	if window_size.x - inspector_zone_width < global_mouse_x_point and global_mouse_x_point < window_size.x - 6 and inspector_zone_height < global_mouse_y_point:
+		on_color_palette = true
+	else:
+		on_color_palette = false
+	
 	_update_inspector_position()
 	_update_layer_position()
 	_draw_guide_line()
@@ -240,13 +276,23 @@ func _input(event):
 			if not is_mouse_on_preview:
 				if event.button_index == MOUSE_BUTTON_WHEEL_UP:
 					is_mouse_wheel_move = true
+					
+					offset_x -= int(canvas_mouse_x) / dot_size - 1
+					offset_y -= canvas_mouse_y / dot_size - 1
+					
 					dot_size += zoom_increment
+					
 					_update_grid_size()
 					_move_canvas_sprite()
 				
 				elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 					is_mouse_wheel_move = true
+					
+					offset_x += int(canvas_mouse_x) / dot_size
+					offset_y += canvas_mouse_y / dot_size
+					
 					dot_size = max(1, dot_size - zoom_increment)
+					
 					_update_grid_size()
 					_move_canvas_sprite()
 			
@@ -468,6 +514,32 @@ func _draw_guide_line():
 	
 	guide_line.points = points
 	guide_line.width = guide_line_width
+
+# Unfinished
+func _draw_color_palette_focus_frame(x_th_color_piece, y_th_color_piece):
+	var top_left_x = 0#window_size.x - inspector_zone_width + 6 + (color_piece_scale + color_focus_frame_width) * (x_th_color_piece - 1)#guide_line_width / 2
+	var top_left_y = guide_line_width / 2
+	var top_right_x = canvas_width * preview_zoom_X + guide_line_width * 1.5
+	var top_right_y = guide_line_width / 2
+	var bottom_right_x = canvas_width * preview_zoom_X + guide_line_width * 1.5
+	var bottom_right_y = canvas_height * preview_zoom_X + guide_line_width * 1.5
+	var bottom_left_x = guide_line_width / 2
+	var bottom_left_y = canvas_height * preview_zoom_X + guide_line_width * 1.5
+	var window_size = get_viewport().size
+	var window_width = window_size.x
+	var window_height = window_size.y
+	var guide_line_color = Color.RED
+	
+	var points = [
+		Vector2(top_left_x, top_left_y),
+		Vector2(top_right_x, top_right_y),
+		Vector2(bottom_right_x, bottom_right_y),
+		Vector2(bottom_left_x, bottom_left_y),
+		Vector2(top_left_x, top_left_y - color_focus_frame_width / 2 )
+	]
+	
+	color_focus_line.points = points
+	color_focus_line.width = color_focus_frame_width
 
 func _add_layer():
 	layers_num += 1

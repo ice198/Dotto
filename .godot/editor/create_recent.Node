@@ -1,7 +1,10 @@
+Line2D
+ReferenceRect
+Button
+ColorRect
+ColorPickerButton
 HSplitContainer
 Node
-ColorRect
-Button
 Label
 SpinBox
 LineEdit
@@ -10,6 +13,3 @@ Control
 AcceptDialog
 PopupPanel
 WorldEnvironment
-TextureRect
-Line2D
-VSlider
