@@ -1,6 +1,6 @@
 ea4bc82a6ad023ab7ee23ee620429895
-::res://::1728223810
-export_presets.cfg::TextFile::-1::1728142527::0::1::::<><>::
+::res://::1730018406
+export_presets.cfg::TextFile::-1::1728227724::0::1::::<><>::
 icon.svg::CompressedTexture2D::2335001591404326798::1726908645::1726908657::1::::<><>::
 README.md::TextFile::-1::1727775032::0::1::::<><>::
 ::res://assets/::1727626489
@@ -12,9 +12,9 @@ checkerboard-pattern.png::CompressedTexture2D::114605284501409827::1727014683::1
 download.svg::CompressedTexture2D::8152172047051593679::1726984417::1726984708::1::::<><>::
 drag.png::CompressedTexture2D::369714728000777305::1726995681::1726995688::1::::<><>::
 grid.png::CompressedTexture2D::5948150076641368828::1727003082::1727003223::1::::<><>::
-::res://scenes/::1728223684
-main.tscn::PackedScene::6966536384637014752::1728223684::0::1::::<><>::res://scripts/main.gd<>uid://bvrsdlgs6rnn::::res://icon/checkerboard-pattern.png<>uid://doe8c2pigmbrj::::res://icon/download.svg<>uid://cq0lfsd2r0wqm::::res://icon/grid.png<>res://scripts/cache_canvas.gd<>res://scripts/start.gd<>uid://cb3x1gbe7mu0h::::res://font/NotoSansJP-Regular.ttf
-::res://scripts/::1728223684
+::res://scenes/::1728227627
+main.tscn::PackedScene::6966536384637014752::1728227627::0::1::::<><>::res://scripts/main.gd<>uid://bvrsdlgs6rnn::::res://icon/checkerboard-pattern.png<>uid://doe8c2pigmbrj::::res://icon/download.svg<>uid://cq0lfsd2r0wqm::::res://icon/grid.png<>res://scripts/cache_canvas.gd<>res://scripts/start.gd<>uid://cb3x1gbe7mu0h::::res://font/NotoSansJP-Regular.ttf
+::res://scripts/::1728227627
 cache_canvas.gd::GDScript::-1::1728142043::0::1::::<>TextureRect<>::
-main.gd::GDScript::-1::1728223684::0::1::::<>Control<>::
+main.gd::GDScript::-1::1728227627::0::1::::<>Control<>::
 start.gd::GDScript::-1::1728141954::0::1::::<>ColorRect<>::
